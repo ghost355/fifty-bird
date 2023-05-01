@@ -4,6 +4,7 @@ Class = require 'class'
 require 'Bird'
 require 'Pipe'
 
+
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
@@ -29,6 +30,7 @@ local bird = Bird()
 local pipes = {}
 
 local spawnTimer = 0
+local lastY = VIRTUAL_HEIGHT / 2 + math.random(-10, 10)
 
 
 GRAVITY = 20
@@ -77,8 +79,10 @@ function love.update(dt)
 
 
     spawnTimer = spawnTimer + dt
-    if spawnTimer > 3 then
-        table.insert(pipes, Pipe())
+    if spawnTimer > 2 then
+        local y = math.max(PIPE_GAP, math.min(lastY + math.random(-40, 40), VIRTUAL_HEIGHT - PIPE_GAP))
+        lastY = y
+        table.insert(pipes, Pipe(y))
         spawnTimer = 0
     end
 
