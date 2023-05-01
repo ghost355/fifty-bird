@@ -7,8 +7,7 @@
     the bird will flap and go up a little bit, where it will then be affected by gravity. If the bird hits
     the ground or a pipe, the game is over.
 ]]
-
-Bird = Class{}
+Bird = Class {}
 
 local GRAVITY = 20
 
@@ -40,7 +39,6 @@ function Bird:collides(pipe)
             return true
         end
     end
-
     return false
 end
 
