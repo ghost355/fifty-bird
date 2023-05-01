@@ -3,9 +3,14 @@ Pipe = Class {}
 local PIPE_IMAGE = love.graphics.newImage('pipe.png')
 local PIPE_SCROLL = -60
 
-function Pipe:init()
+PIPE_SPEED = 60
+PIPE_GAP = 70
+PIPE_HEIGHT = 288
+PIPE_WIDTH = 70
+
+function Pipe:init(y)
     self.x = VIRTUAL_WIDTH
-    self.y = math.random(VIRTUAL_HEIGHT / 4, VIRTUAL_HEIGHT - 30)
+    self.y = y
 
     self.width = love.graphics.getWidth(PIPE_IMAGE)
 end
@@ -15,6 +20,8 @@ function Pipe:update(dt)
 end
 
 function Pipe:render()
-    love.graphics.draw(PIPE_IMAGE, self.x, self.y)
-    love.graphics.draw(PIPE_IMAGE, self.x, self.y - 60, rotation, 1, -1)
+    -- bootom pipe
+    love.graphics.draw(PIPE_IMAGE, self.x, self.y + PIPE_GAP / 2)
+    -- top pipe
+    love.graphics.draw(PIPE_IMAGE, self.x, self.y - PIPE_GAP / 2, rotation, 1, -1)
 end
