@@ -11,6 +11,8 @@ WINDOW_HEIGHT = 720
 VIRTUAL_WIDTH = 512
 VIRTUAL_HEIGHT = 288
 
+PATH_AMPLITUDE = 30
+
 local background = love.graphics.newImage('background.png')
 local backgroundScroll = 0
 
@@ -30,7 +32,10 @@ local bird = Bird()
 local pipes = {}
 
 local spawnTimer = 0
+-- lastY need to calculate next value of the pipe gap, to smooth flying path
 local lastY = VIRTUAL_HEIGHT / 2 + math.random(-10, 10)
+
+local scrolling = true
 
 
 GRAVITY = 20
@@ -70,33 +75,45 @@ function love.keyboard.wasPressed(key)
 end
 
 function love.update(dt)
-    backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt)
-        % BACKGROUND_LOOPING_POINT
-    groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt)
-        % VIRTUAL_WIDTH
-    zaborScroll = (zaborScroll + ZABOR_SCROLL_SPEED * dt)
-        % 512
+    if scrolling then
+        backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt)
+            % BACKGROUND_LOOPING_POINT
+        groundScroll = (groundScroll + GROUND_SCROLL_SPEED * dt)
+            % VIRTUAL_WIDTH
+        zaborScroll = (zaborScroll + ZABOR_SCROLL_SPEED * dt)
+            % 512
 
 
-    spawnTimer = spawnTimer + dt
-    if spawnTimer > 2 then
-        local y = math.max(PIPE_GAP, math.min(lastY + math.random(-40, 40), VIRTUAL_HEIGHT - PIPE_GAP))
-        lastY = y
-        table.insert(pipes, Pipe(y))
-        spawnTimer = 0
-    end
+        spawnTimer = spawnTimer + dt
+        if spawnTimer > 2 then
+            -- if Y > then your high border then Y = HighBorder (here, 80 px from top)
+            -- if Y < then your low border then Y = LowBorder (here, 80 px form bottom)
+            -- formula: math.max(top_border, math.min(value, bottom_border))
 
-    bird:update(dt)
-
-    for k, pipe in pairs(pipes) do
-        pipe:update(dt)
-        if pipe.x < -pipe.width then
-            table.remove(pipes, k)
+            local y = math.max(PIPE_GAP - 10,
+                math.min(lastY + math.random(-PATH_AMPLITUDE, PATH_AMPLITUDE), VIRTUAL_HEIGHT - PIPE_GAP + 10))
+            lastY = y
+            table.insert(pipes, Pipe(y))
+            spawnTimer = 0
         end
-    end
 
-    -- reset pressed keys in the end of the frame
-    love.keyboard.keysPressed = {}
+        bird:update(dt)
+
+        for k, pipe in pairs(pipes) do
+            pipe:update(dt)
+
+            if bird:collides(pipe) then
+                -- scrolling = false
+            end
+
+            if pipe.x < -pipe.width then
+                table.remove(pipes, k)
+            end
+        end
+
+        -- reset pressed keys in the end of the frame
+        love.keyboard.keysPressed = {}
+    end
 end
 
 function love.draw()
@@ -111,6 +128,7 @@ function love.draw()
     end
 
     love.graphics.draw(ground, -groundScroll, VIRTUAL_HEIGHT - 16)
+
 
 
 
