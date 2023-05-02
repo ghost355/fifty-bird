@@ -5,6 +5,11 @@ require 'Bird'
 require 'Pipe'
 require 'PipePair'
 
+require 'StateMachine'
+require 'states/BaseState'
+require 'states/PlayState'
+require 'states/TitleScreenState'
+
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -44,11 +49,15 @@ GRAVITY = 20
 ANTIGRAVITY = -5
 
 function love.load()
-    print('SOME USEFUL INFO ')
-
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
     love.window.setTitle('Fifty Bird')
+
+    smallFont = love.graphics.newFont('font.ttf', 8)
+    mediumFont = love.graphics.newFont('flappy.ttf', 14)
+    flappyFont = love.graphics.newFont('flappy.ttf', 28)
+    hugeFont = love.graphics.newFont('flappy.ttf', 56)
+    love.graphics.setFont(flappyFont)
 
     math.randomseed(os.time())
 
@@ -57,6 +66,16 @@ function love.load()
         fullscreen = false,
         resizeble = true
     })
+
+
+    -- stateMachine
+    gStateMachine = StateMachine {
+        title = function() return TitleScreenState() end,
+        play = function() return PlayState() end
+    }
+    gStateMachine:change('title')
+
+
     -- create empty table for hold pressed keys each frame
     love.keyboard.keysPressed = {}
 end
@@ -88,41 +107,44 @@ function love.update(dt)
             % 512
 
 
-        spawnTimer = spawnTimer + dt
-        if spawnTimer > 2 then
-            -- if Y > then your high border then Y = HighBorder (here, 80 px from top)
-            -- if Y < then your low border then Y = LowBorder (here, 80 px form bottom)
-            -- formula: math.max(top_border, math.min(value, bottom_border))
-
-            local y = math.max(-PIPE_HEIGHT + 10,
-                math.min(lastY + math.random(-40, 40), VIRTUAL_HEIGHT - GAP_HEIGHT - PIPE_HEIGHT))
-            lastY = y
-
-            table.insert(pipePairs, PipePair(y))
-            spawnTimer = 0
-        end
-
-        bird:update(dt)
-
-        for k, pair in pairs(pipePairs) do
-            pair:update(dt)
-
-            for _, pipe in pairs(pair.pipes) do
-                if bird:collides(pipe) then
-                    scrolling = false
-                end
-            end
-
-            for k, pair in pairs(pipePairs) do
-                if pair.remove then
-                    table.remove(pipePairs, k)
-                end
-            end
-        end
+        gStateMachine:update(dt)
     end
-    -- reset pressed keys in the end of the frame
     love.keyboard.keysPressed = {}
 end
+
+--     spawnTimer = spawnTimer + dt
+--     if spawnTimer > 2 then
+--         -- if Y > then your high border then Y = HighBorder (here, 80 px from top)
+--         -- if Y < then your low border then Y = LowBorder (here, 80 px form bottom)
+--             -- formula: math.max(top_border, math.min(value, bottom_border))
+
+--         local y = math.max(-PIPE_HEIGHT + 10,
+--             math.min(lastY + math.random(-40, 40), VIRTUAL_HEIGHT - GAP_HEIGHT - PIPE_HEIGHT))
+--         lastY = y
+
+--         table.insert(pipePairs, PipePair(y))
+--         spawnTimer = 0
+--     end
+
+--     bird:update(dt)
+
+--     for k, pair in pairs(pipePairs) do
+--         pair:update(dt)
+
+--         for _, pipe in pairs(pair.pipes) do
+--             if bird:collides(pipe) then
+--                 scrolling = false
+--             end
+--         end
+
+--         for k, pair in pairs(pipePairs) do
+--             if pair.remove then
+--                 table.remove(pipePairs, k)
+--             end
+--         end
+--     end
+-- end
+-- -- reset pressed keys in the end of the frame
 
 function love.draw()
     push:start()
@@ -130,13 +152,14 @@ function love.draw()
     love.graphics.draw(background, -backgroundScroll, 0)
     love.graphics.draw(zabor, -zaborScroll, VIRTUAL_HEIGHT - 16 - 32)
 
-    for _, pair in pairs(pipePairs) do
-        pair:render()
-    end
+    gStateMachine:render()
+    -- for _, pair in pairs(pipePairs) do
+    --     pair:render()
+    -- end
 
     love.graphics.draw(ground, -groundScroll, VIRTUAL_HEIGHT - 16)
 
-    bird:render()
+    -- bird:render()
 
     push:finish()
 end
