@@ -17,7 +17,23 @@ function PlayState:init()
     self.lastY = -PIPE_HEIGHT + math.random(80) + 20
 end
 
+function PlayState:enter(params)
+    if params then
+        self.bird = params.bird
+        self.pipePairs = params.pairs
+        self.score = params.score
+    end
+end
+
 function PlayState:update(dt)
+    if love.keyboard.wasPressed('p') then
+        gStateMachine:change('pause', {
+            bird = self.bird,
+            pairs = self.pipePairs,
+            score = self.score
+        })
+    end
+
     self.timer = self.timer + dt
 
     local gap = math.random(2, 6)
