@@ -96,6 +96,7 @@ function love.load()
 
     -- create empty table for hold pressed keys each frame
     love.keyboard.keysPressed = {}
+    love.mouse.buttonsPressed = {}
 end
 
 function love.resize(w, h)
@@ -115,6 +116,14 @@ function love.keyboard.wasPressed(key)
     return love.keyboard.keysPressed[key]
 end
 
+function love.mousepressed(x, y, button)
+    love.mouse.buttonsPressed[button] = true
+end
+
+function love.mouse.justPressed(button)
+    return love.mouse.buttonsPressed[button]
+end
+
 function love.update(dt)
     if scrolling then
         backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt)
@@ -128,6 +137,7 @@ function love.update(dt)
         gStateMachine:update(dt)
     end
     love.keyboard.keysPressed = {}
+    love.mouse.buttonsPressed = {}
 end
 
 function love.draw()

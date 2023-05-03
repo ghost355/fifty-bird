@@ -5,9 +5,10 @@ GAP_HEIGHT = 90
 function PipePair:init(y)
     self.x = VIRTUAL_WIDTH + 32
     self.y = y
+    self.gap = math.random(70, 100)
     self.pipes = {
         upper = Pipe('top', self.y),
-        lower = Pipe('bottom', self.y + PIPE_HEIGHT + GAP_HEIGHT)
+        lower = Pipe('bottom', self.y + PIPE_HEIGHT + self.gap)
     }
     self.remove = false
     self.scored = false
